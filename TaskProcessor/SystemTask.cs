@@ -9,6 +9,7 @@ namespace TaskProcessor
 {
     public enum Status
     {
+        Created,
         Waiting,
         InProgress,
         Finished,
@@ -17,8 +18,8 @@ namespace TaskProcessor
 
     public class SystemTask
     {
-        private static int _idCount = 0;
         public int Id { get; set; }
+        private static int _idCount = 0;
         public Status CurrentStatus { get; set; }
         public SubTaskRepository WaitingSubTasks { get; set; }
         public SubTaskRepository CompletedSubTasks { get; set; }
@@ -28,7 +29,7 @@ namespace TaskProcessor
         public SystemTask()
         {
             Id = _idCount++;
-            CurrentStatus = Status.Waiting;
+            CurrentStatus = Status.Created;
             WaitingSubTasks = new SubTaskRepository();
             CompletedSubTasks = new SubTaskRepository();
             var randomValue = new Random().Next(10,100);
@@ -41,17 +42,21 @@ namespace TaskProcessor
 
         }
 
-        public async Task Start()
+        public Task Start()
         {
             CurrentStatus = Status.InProgress;
-            WaitingSubTasks.GetAll().ToList().ForEach(async subtask =>
+            Task startingTasks = Task.Run(() =>
             {
-                await subtask.Start();
-                if (subtask.isCompleted)
+                foreach(var subtask in WaitingSubTasks.GetAll().ToList()) 
                 {
-                    CompletedSubTasks.Add(subtask);
-                    WaitingSubTasks.Delete(subtask);
-                    Progress = CompletedSubTasks.GetAll().Count();
+                    var result = subtask.Start();
+
+                    if (result.IsCompleted)
+                    {
+                        CompletedSubTasks.Add(subtask);
+                        WaitingSubTasks.Delete(subtask);
+                        Progress = CompletedSubTasks.GetAll().Count();
+                    }
                 }
 
                 if (CompletedSubTasks.GetAll().Count() == TotalSubTasks)
@@ -60,6 +65,7 @@ namespace TaskProcessor
                 }
             });
 
+            return Task.CompletedTask;
         }
 
         public Boolean isActive()

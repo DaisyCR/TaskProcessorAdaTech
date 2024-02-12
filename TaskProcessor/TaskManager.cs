@@ -2,64 +2,94 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using TaskProcessor;
 
 namespace TaskProcessor_Core
 {
-    public static class  TaskManager
+    public static class TaskManager
     {
         private static IRepository<SystemTask> Tasks = new TaskRepository();
 
-        public static SystemTask CreateNewTask()
+        public static Task<SystemTask> CreateNewTask()
         {
-            var newTask = new SystemTask();
-            Tasks.Add(newTask);
-            return newTask;
+            Task<SystemTask> creatingNewTask = Task.Run(() =>
+            {
+                var newTask = new SystemTask();
+                Tasks.Add(newTask);
+                return newTask;
+            });
+
+            return creatingNewTask;
         }
 
-        public static SystemTask GetTaskById(int id)
+        public static Task<SystemTask> GetTaskById(int id)
         {
-            return Tasks.GetById(id);
-        }
-        public static void CancelTask(int taskId) {
-            var currentTask = Tasks.GetById(taskId);
-            if(currentTask == null)
+            Task<SystemTask> gettingTaskById = Task.Run(() =>
             {
-                throw new InvalidOperationException();
-            }
-            if (currentTask.isNotActive())
-            {
-                throw new InvalidOperationException();
-            }
-            currentTask.CurrentStatus = Status.Canceled;
-        }
+                return Tasks.GetById(id);
+            });
 
-        public static IEnumerable<SystemTask> GetActiveTasks()
+            return gettingTaskById;
+            
+        }
+        public static Task CancelTask(int taskId)
         {
-            var activeStatusList = new List<SystemTask>();
-            foreach(var task in Tasks.GetAll())
+            Task cancellingTask = Task.Run(() => 
             {
-                if (task.isActive())
+                var currentTask = Tasks.GetById(taskId);
+                if (currentTask == null)
                 {
-                    activeStatusList.Add(task);
+                    throw new InvalidOperationException();
                 }
-            }
-            return activeStatusList;
+                if (currentTask.isNotActive())
+                {
+                    throw new InvalidOperationException();
+                }
+                currentTask.CurrentStatus = Status.Canceled;
+            });
+
+            return Task.CompletedTask;
         }
 
-        public static IEnumerable<SystemTask> GetInactiveTasks()
+        public static async Task<IEnumerable<SystemTask>> GetActiveTasks()
+        {
+            var activeTasksList = new List<SystemTask>();
+            var gettingActiveTasks = Task.Run(() =>
+            {
+                foreach (var task in Tasks.GetAll())
+                {
+                    if (task.isActive())
+                    {
+                        activeTasksList.Add(task);
+                    }
+                }
+
+                return activeTasksList;
+            });
+
+            return await gettingActiveTasks;
+            
+        }
+
+        public static async Task<IEnumerable<SystemTask>> GetInactiveTasks()
         {
             var inactiveStatusList = new List<SystemTask>();
-            foreach(var task in Tasks.GetAll())
+            var gettingInactiveTasks = Task.Run(() =>
             {
-                if (task.isNotActive())
+                foreach (var task in Tasks.GetAll())
                 {
-                    inactiveStatusList.Add(task);
+                    if (task.isNotActive())
+                    {
+                        inactiveStatusList.Add(task);
+                    }
                 }
-            }
-            return inactiveStatusList;
+                return inactiveStatusList;
+            });
+
+            return await gettingInactiveTasks;
         }
 
 

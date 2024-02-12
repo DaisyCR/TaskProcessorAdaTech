@@ -10,16 +10,15 @@ namespace TaskProcessor_Core
     public class SubTask
     {
         private int _randomValue;
-        public bool isCompleted = false;
        public SubTask()
         {
             _randomValue = new Random().Next(3, 60);
         }
 
-        public async Task Start()
+        public Task Start()
         {
-            await Task.Delay(_randomValue * 1000);
-            isCompleted = true;
+            Task.Delay(_randomValue * 1000);
+            return Task.CompletedTask;
         }
     }
 

@@ -7,8 +7,7 @@ namespace TaskProcessor_ConsoleUI
 {
     internal class Program
     {
-        private static TaskManager manager = new TaskManager();
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             
             PrintMenu();
@@ -20,25 +19,25 @@ namespace TaskProcessor_ConsoleUI
                 switch (keyInfo.Key)
                 {
                     case ConsoleKey.D1:
-                        var newTask = manager.CreateNewTask();
-                        Console.WriteLine($"Task #{newTask.Id} created succefully");
+                        var newTask = TaskManager.CreateNewTask();
+                        Console.WriteLine($"Task #{newTask.Result.Id} created succefully");
                         break;
                     case ConsoleKey.D2:
-                        PrintTasks(manager.GetActiveTasks());
+                        PrintTasks(TaskManager.GetActiveTasks().Result);
                         break;
                     case ConsoleKey.D3:
-                        PrintTasks(manager.GetInactiveTasks());
+                        PrintTasks(TaskManager.GetInactiveTasks().Result);
                         break;
                     case ConsoleKey.D4:
-                        manager.GetActiveTasks().ForEach(async task =>
+                        foreach(var task in TaskManager.GetActiveTasks().Result)
                         {
-                            await task.Start();
-                        });
-                        while (manager.GetActiveTasks().Count() > 0)
+                            task.Start();
+                        }
+                        while (TaskManager.GetActiveTasks().Result.Count() > 0)
                         {
                             Thread.Sleep(500);
                             Console.Clear();
-                            PrintTasks(manager.GetActiveTasks());
+                            PrintTasks(TaskManager.GetActiveTasks().Result);
                         }
                         
                         break;
@@ -60,14 +59,14 @@ namespace TaskProcessor_ConsoleUI
             Console.WriteLine("---------------------------------------------------");
         }
 
-        private static void PrintTasks(List<SystemTask> tasks)
+        private static void PrintTasks(IEnumerable<SystemTask> tasks)
         {
-            tasks.ForEach(task =>
+            foreach(var task in tasks)
             {
                 Console.WriteLine($"Task #{task.Id}\n" +
                     $"Status: {task.CurrentStatus}\n" +
                     $"Progress: {task.Progress} / {task.TotalSubTasks}\n");
-            });
+            }
 
          }
     }
