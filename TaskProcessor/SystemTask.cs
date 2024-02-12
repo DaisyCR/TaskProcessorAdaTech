@@ -19,7 +19,7 @@ namespace TaskProcessor
     public class SystemTask
     {
         public int Id { get; set; }
-        private static int _idCount = 0;
+        private static int _idCount = 1;
         public Status CurrentStatus { get; set; }
         public SubTaskRepository WaitingSubTasks { get; set; }
         public SubTaskRepository CompletedSubTasks { get; set; }
@@ -49,9 +49,7 @@ namespace TaskProcessor
             {
                 foreach(var subtask in WaitingSubTasks.GetAll().ToList()) 
                 {
-                    var result = subtask.Start();
-
-                    if (result.IsCompleted)
+                    if (subtask.Start().IsCompleted)
                     {
                         CompletedSubTasks.Add(subtask);
                         WaitingSubTasks.Delete(subtask);

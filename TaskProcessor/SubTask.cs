@@ -17,8 +17,7 @@ namespace TaskProcessor_Core
 
         public Task Start()
         {
-            Task.Delay(_randomValue * 1000);
-            return Task.CompletedTask;
+            return Task.Delay(_randomValue * 1000);
         }
     }
 

@@ -20,6 +20,7 @@ namespace TaskProcessor_ConsoleUI
                 {
                     case ConsoleKey.D1:
                         var newTask = TaskManager.CreateNewTask();
+                        _ = TaskManager.GetActiveTasks();
                         Console.WriteLine($"Task #{newTask.Result.Id} created succefully");
                         break;
                     case ConsoleKey.D2:
@@ -29,13 +30,14 @@ namespace TaskProcessor_ConsoleUI
                         PrintTasks(TaskManager.GetInactiveTasks().Result);
                         break;
                     case ConsoleKey.D4:
-                        foreach(var task in TaskManager.GetActiveTasks().Result)
-                        {
-                            task.Start();
-                        }
+                        
                         while (TaskManager.GetActiveTasks().Result.Count() > 0)
                         {
-                            Thread.Sleep(500);
+                            foreach (var task in TaskManager.GetActiveTasks().Result)
+                            {
+                                task.Start();
+                            }
+                            Thread.Sleep(1000);
                             Console.Clear();
                             PrintTasks(TaskManager.GetActiveTasks().Result);
                         }
@@ -65,6 +67,7 @@ namespace TaskProcessor_ConsoleUI
             {
                 Console.WriteLine($"Task #{task.Id}\n" +
                     $"Status: {task.CurrentStatus}\n" +
+                    $"WaitingSubTasks: {task.WaitingSubTasks.GetAll().Count()}\n" +
                     $"Progress: {task.Progress} / {task.TotalSubTasks}\n");
             }
 

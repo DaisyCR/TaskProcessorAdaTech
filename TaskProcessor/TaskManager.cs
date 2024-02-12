@@ -19,6 +19,7 @@ namespace TaskProcessor_Core
             {
                 var newTask = new SystemTask();
                 Tasks.Add(newTask);
+
                 return newTask;
             });
 
@@ -59,12 +60,30 @@ namespace TaskProcessor_Core
             var activeTasksList = new List<SystemTask>();
             var gettingActiveTasks = Task.Run(() =>
             {
-                foreach (var task in Tasks.GetAll())
+                foreach(var task in Tasks.GetAll())
                 {
                     if (task.isActive())
                     {
+                        if(task.CurrentStatus != Status.InProgress)
+                        {
+                            task.CurrentStatus = Status.Waiting;
+                        }
                         activeTasksList.Add(task);
                     }
+                }
+
+                while(activeTasksList.Count() < 5 && GetInactiveTasks().Result.Count() > 0)
+                {
+                    var nextTask = GetInactiveTasks().Result.First();
+                    if(nextTask == null)
+                    {
+                        break;
+                    }
+                    if (nextTask.CurrentStatus != Status.InProgress)
+                    {
+                        nextTask.CurrentStatus = Status.Waiting;
+                    }
+                    activeTasksList.Add(nextTask);
                 }
 
                 return activeTasksList;
