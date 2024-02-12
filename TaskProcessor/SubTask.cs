@@ -9,21 +9,17 @@ namespace TaskProcessor_Core
 {
     public class SubTask
     {
-        public TimeSpan duration { get; set; }
-        public Boolean isCompleted = false;
-
-        public SubTask()
+        private int _randomValue;
+        public bool isCompleted = false;
+       public SubTask()
         {
-            var randomValue = new Random().Next(1, 2);
-            duration = TimeSpan.FromSeconds(randomValue);
-            Task<int> result = Start();
+            _randomValue = new Random().Next(3, 60);
         }
 
-        public async Task<int> Start()
+        public async Task Start()
         {
-            await Task.Delay(duration);
+            await Task.Delay(_randomValue * 1000);
             isCompleted = true;
-            return 0;
         }
     }
 

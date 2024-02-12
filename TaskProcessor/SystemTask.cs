@@ -20,42 +20,43 @@ namespace TaskProcessor
         private static int _idCount = 0;
         public int Id { get; set; }
         public Status CurrentStatus { get; set; }
-        public List<SubTask> WaitingSubTasks { get; set; }
-        public List<SubTask> CompletedSubTasks { get; set; }
+        public SubTaskRepository WaitingSubTasks { get; set; }
+        public int CompletedSubTasks { get; set; }
         public int Progression { get; set; }
+        public int TotalSubTasks;
 
         public SystemTask()
         {
             Id = _idCount++;
             CurrentStatus = Status.Waiting;
-            WaitingSubTasks = new List<SubTask>();
-            CompletedSubTasks = new List<SubTask>();
-            var randomValue = new Random().Next(1,5);
+            WaitingSubTasks = new SubTaskRepository();
+            CompletedSubTasks = 0;
+            Progression = 0;
+            var randomValue = new Random().Next(10,100);
             for(int i = 0; i < randomValue; i++)
             {
                 WaitingSubTasks.Add(new SubTask());
             }
+            TotalSubTasks = WaitingSubTasks.GetAll().Count();
         }
 
-        public void Start()
+        public async Task Start()
         {
-            WaitingSubTasks.ForEach(subtask =>
+            WaitingSubTasks.GetAll().ToList().ForEach(async subtask =>
             {
-                subtask.Start();
+                await subtask.Start();
+                if (subtask.isCompleted)
+                {
+                    CompletedSubTasks++;
+                    WaitingSubTasks.Delete(subtask);
+                }
+
+                if (CompletedSubTasks == TotalSubTasks)
+                {
+                    CurrentStatus = Status.Finished;
+                }
             });
 
-            do
-            {
-                WaitingSubTasks.ForEach(subtask =>
-                {
-                    if (subtask.isCompleted)
-                    {
-                        CompletedSubTasks.Add(subtask);
-                        WaitingSubTasks.Remove(subtask);
-                    }
-                });
-            } while( WaitingSubTasks.Count > 0 );
-            
         }
 
         public Boolean isActive()
@@ -66,12 +67,6 @@ namespace TaskProcessor
         public Boolean isNotActive()
         {
             return !isActive();
-        }
-
-        public int GetProgression()
-        {
-            var totalSubTasks = WaitingSubTasks.Count + CompletedSubTasks.Count;
-            return CompletedSubTasks.Count / totalSubTasks;
         }
     }
 }

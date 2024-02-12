@@ -31,7 +31,13 @@ namespace TaskProcessor_ConsoleUI
                         {
                             task.Start();
                         });
-                        PrintActiveTasks();
+                        while (manager.GetActiveTasks().Count() > 0)
+                        {
+                            Thread.Sleep(500);
+                            Console.Clear();
+                            PrintActiveTasks();
+                        }
+                        
                         break;
                 }
                 PrintMenu();
@@ -41,6 +47,8 @@ namespace TaskProcessor_ConsoleUI
 
         private static void PrintMenu()
         {
+            Thread.Sleep(100);
+            Console.Clear();
             Console.WriteLine("Hello, World!");
             Console.WriteLine("Press 1 to create a new task");
             Console.WriteLine("Press 2 to show active tasks");
@@ -52,8 +60,12 @@ namespace TaskProcessor_ConsoleUI
         {
             manager.GetActiveTasks().ForEach(task =>
             {
-                Console.WriteLine($"Task #{task.Id} {task.WaitingSubTasks.Count}/ {task.GetProgression()}%");
+                Console.WriteLine($"Task #{task.Id}\n" +
+                    $"WaitingSubTasks: {task.WaitingSubTasks.GetAll().Count()}\n" +
+                    $"CompletedSubTasks: {task.CompletedSubTasks}\n");
             });
-        }
+
+         }
+            
     }
 }
