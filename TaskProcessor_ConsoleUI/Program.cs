@@ -20,22 +20,25 @@ namespace TaskProcessor_ConsoleUI
                 switch (keyInfo.Key)
                 {
                     case ConsoleKey.D1:
-                        manager.CreateNewTask();
-                        Console.WriteLine($"Task #{manager.Tasks.GetAll().ToList().Last().Id} created succefully");
+                        var newTask = manager.CreateNewTask();
+                        Console.WriteLine($"Task #{newTask.Id} created succefully");
                         break;
                     case ConsoleKey.D2:
-                        PrintActiveTasks();
+                        PrintTasks(manager.GetActiveTasks());
                         break;
                     case ConsoleKey.D3:
-                        manager.Tasks.GetAll().ToList().ForEach(task =>
+                        PrintTasks(manager.GetInactiveTasks());
+                        break;
+                    case ConsoleKey.D4:
+                        manager.GetActiveTasks().ForEach(async task =>
                         {
-                            task.Start();
+                            await task.Start();
                         });
                         while (manager.GetActiveTasks().Count() > 0)
                         {
                             Thread.Sleep(500);
                             Console.Clear();
-                            PrintActiveTasks();
+                            PrintTasks(manager.GetActiveTasks());
                         }
                         
                         break;
@@ -52,20 +55,20 @@ namespace TaskProcessor_ConsoleUI
             Console.WriteLine("Hello, World!");
             Console.WriteLine("Press 1 to create a new task");
             Console.WriteLine("Press 2 to show active tasks");
-            Console.WriteLine("Press 3 to run all task");
+            Console.WriteLine("Press 3 to show inactive tasks");
+            Console.WriteLine("Press 4 to run all task");
             Console.WriteLine("---------------------------------------------------");
         }
 
-        private static void PrintActiveTasks()
+        private static void PrintTasks(List<SystemTask> tasks)
         {
-            manager.GetActiveTasks().ForEach(task =>
+            tasks.ForEach(task =>
             {
                 Console.WriteLine($"Task #{task.Id}\n" +
-                    $"WaitingSubTasks: {task.WaitingSubTasks.GetAll().Count()}\n" +
-                    $"CompletedSubTasks: {task.CompletedSubTasks}\n");
+                    $"Status: {task.CurrentStatus}\n" +
+                    $"Progress: {task.Progress} / {task.TotalSubTasks}\n");
             });
 
          }
-            
     }
 }

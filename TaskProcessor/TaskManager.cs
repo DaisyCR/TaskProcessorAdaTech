@@ -8,21 +8,22 @@ using TaskProcessor;
 
 namespace TaskProcessor_Core
 {
-    public class TaskManager
+    public static class  TaskManager
     {
-        public IRepository<SystemTask> Tasks { get; set; }
+        private static IRepository<SystemTask> Tasks = new TaskRepository();
 
-        public TaskManager()
+        public static SystemTask CreateNewTask()
         {
-            Tasks = new TaskRepository(); ;
+            var newTask = new SystemTask();
+            Tasks.Add(newTask);
+            return newTask;
         }
 
-        public void CreateNewTask()
+        public static SystemTask GetTaskById(int id)
         {
-            Tasks.Add(new SystemTask());
+            return Tasks.GetById(id);
         }
-
-        public void CancelTask(int taskId) {
+        public static void CancelTask(int taskId) {
             var currentTask = Tasks.GetById(taskId);
             if(currentTask == null)
             {
@@ -35,17 +36,30 @@ namespace TaskProcessor_Core
             currentTask.CurrentStatus = Status.Canceled;
         }
 
-        public List<SystemTask> GetActiveTasks()
+        public static IEnumerable<SystemTask> GetActiveTasks()
         {
             var activeStatusList = new List<SystemTask>();
-            Tasks.GetAll().ToList().ForEach(task =>
+            foreach(var task in Tasks.GetAll())
             {
                 if (task.isActive())
                 {
                     activeStatusList.Add(task);
                 }
-            });
+            }
             return activeStatusList;
+        }
+
+        public static IEnumerable<SystemTask> GetInactiveTasks()
+        {
+            var inactiveStatusList = new List<SystemTask>();
+            foreach(var task in Tasks.GetAll())
+            {
+                if (task.isNotActive())
+                {
+                    inactiveStatusList.Add(task);
+                }
+            }
+            return inactiveStatusList;
         }
 
 

@@ -16,7 +16,10 @@ namespace TaskProcessor_Core
 
         public void Delete(SubTask entity)
         {
-            subTasks.Remove(entity);
+            if(subTasks.Count > 0)
+            {
+                subTasks.Remove(entity);
+            }
         }
 
         public IEnumerable<SubTask> GetAll()
