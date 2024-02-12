@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,17 +8,22 @@ using TaskProcessor;
 
 namespace TaskProcessor_Core
 {
-    public static class TaskManager
+    public class TaskManager
     {
-        public static List<SystemTask> taskList = new List<SystemTask>();
+        public IRepository<SystemTask> Tasks { get; set; }
 
-        public static void CreateNewTask()
+        public TaskManager()
         {
-            taskList.Add(new SystemTask());
+            Tasks = new TaskRepository(); ;
         }
 
-        public static void CancelTask(int taskId) {
-            var currentTask = taskList.FirstOrDefault(x => x.Id == taskId);
+        public void CreateNewTask()
+        {
+            Tasks.Add(new SystemTask());
+        }
+
+        public void CancelTask(int taskId) {
+            var currentTask = Tasks.GetById(taskId);
             if(currentTask == null)
             {
                 throw new InvalidOperationException();
@@ -29,10 +35,10 @@ namespace TaskProcessor_Core
             currentTask.CurrentStatus = Status.Canceled;
         }
 
-        public static List<SystemTask> GetActiveTasks()
+        public List<SystemTask> GetActiveTasks()
         {
             var activeStatusList = new List<SystemTask>();
-            taskList.ForEach(task =>
+            Tasks.GetAll().ToList().ForEach(task =>
             {
                 if (task.isActive())
                 {

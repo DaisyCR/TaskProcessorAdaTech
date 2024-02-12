@@ -30,11 +30,32 @@ namespace TaskProcessor
             CurrentStatus = Status.Waiting;
             WaitingSubTasks = new List<SubTask>();
             CompletedSubTasks = new List<SubTask>();
-            var randomValue = new Random().Next(10,100);
+            var randomValue = new Random().Next(1,5);
             for(int i = 0; i < randomValue; i++)
             {
                 WaitingSubTasks.Add(new SubTask());
             }
+        }
+
+        public void Start()
+        {
+            WaitingSubTasks.ForEach(subtask =>
+            {
+                subtask.Start();
+            });
+
+            do
+            {
+                WaitingSubTasks.ForEach(subtask =>
+                {
+                    if (subtask.isCompleted)
+                    {
+                        CompletedSubTasks.Add(subtask);
+                        WaitingSubTasks.Remove(subtask);
+                    }
+                });
+            } while( WaitingSubTasks.Count > 0 );
+            
         }
 
         public Boolean isActive()

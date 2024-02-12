@@ -1,13 +1,16 @@
 ﻿using System.Diagnostics;
 using System.Security.Principal;
+using TaskProcessor;
 using TaskProcessor_Core;
 
 namespace TaskProcessor_ConsoleUI
 {
     internal class Program
     {
+        private static TaskManager manager = new TaskManager();
         static void Main(string[] args)
         {
+            
             PrintMenu();
             ConsoleKeyInfo keyInfo;
             do
@@ -17,10 +20,17 @@ namespace TaskProcessor_ConsoleUI
                 switch (keyInfo.Key)
                 {
                     case ConsoleKey.D1:
-                        TaskManager.CreateNewTask();
-                        Console.WriteLine($"Task #{TaskManager.taskList.Last().Id} created succefully");
+                        manager.CreateNewTask();
+                        Console.WriteLine($"Task #{manager.Tasks.GetAll().ToList().Last().Id} created succefully");
                         break;
                     case ConsoleKey.D2:
+                        PrintActiveTasks();
+                        break;
+                    case ConsoleKey.D3:
+                        manager.Tasks.GetAll().ToList().ForEach(task =>
+                        {
+                            task.Start();
+                        });
                         PrintActiveTasks();
                         break;
                 }
@@ -31,17 +41,16 @@ namespace TaskProcessor_ConsoleUI
 
         private static void PrintMenu()
         {
-            Thread.Sleep(500);
-            Console.Clear();
             Console.WriteLine("Hello, World!");
             Console.WriteLine("Press 1 to create a new task");
             Console.WriteLine("Press 2 to show active tasks");
+            Console.WriteLine("Press 3 to run all task");
             Console.WriteLine("---------------------------------------------------");
         }
 
         private static void PrintActiveTasks()
         {
-            TaskManager.GetActiveTasks().ForEach(task =>
+            manager.GetActiveTasks().ForEach(task =>
             {
                 Console.WriteLine($"Task #{task.Id} {task.WaitingSubTasks.Count}/ {task.GetProgression()}%");
             });
